@@ -1,12 +1,9 @@
 import { Hono } from "hono";
+import type { AppContext } from "./app-env";
 import { healthRoutes } from "./modules/health/health.routes";
 import { eventRoutes } from "./modules/events/event.routes";
 
-type Bindings = {
-  APP_ENV: string;
-};
-
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<AppContext>();
 
 app.route("/v1/health", healthRoutes);
 app.route("/v1/events", eventRoutes);
