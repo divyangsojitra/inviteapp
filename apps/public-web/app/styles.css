@@ -1,0 +1,125 @@
+:root {
+  --color-primary: #095764;
+  --color-bg: #fffcf0;
+  --color-surface: #f4ebd0;
+  --color-accent: #ff6b5c;
+  --color-text: #14383f;
+  --color-muted: #68777b;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --radius-8: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.page-shell,
+.invite-page {
+  min-height: 100svh;
+  padding: var(--space-24);
+}
+
+.hero,
+.invite-hero {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 64px 0;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-12);
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: clamp(2rem, 8vw, 4.5rem);
+  line-height: 1.02;
+}
+
+.lead {
+  margin: var(--space-24) 0 0;
+  max-width: 620px;
+  color: var(--color-muted);
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  margin-top: var(--space-32);
+}
+
+.button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-8);
+  padding: 0 var(--space-16);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.button.primary {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.button.secondary {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
+  color: var(--color-primary);
+}
+
+@media (max-width: 640px) {
+  .page-shell,
+  .invite-page {
+    padding: var(--space-16);
+  }
+
+  .hero,
+  .invite-hero {
+    padding: 40px 0 96px;
+  }
+
+  .action-row {
+    position: fixed;
+    right: var(--space-12);
+    bottom: var(--space-12);
+    left: var(--space-12);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: var(--space-8);
+    border-radius: var(--radius-8);
+    background: color-mix(in srgb, var(--color-bg) 94%, white);
+    box-shadow: 0 8px 32px rgb(9 87 100 / 14%);
+  }
+
+  .button {
+    padding: 0 var(--space-8);
+    font-size: 0.875rem;
+  }
+}
