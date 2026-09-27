@@ -1,7 +1,8 @@
 import { Hono } from "hono";
+import type { AppContext } from "../../app-env";
 import { createEventSchema } from "./event.schema";
 
-export const eventRoutes = new Hono();
+export const eventRoutes = new Hono<AppContext>();
 
 eventRoutes.post("/", async (c) => {
   const body = await c.req.json();
