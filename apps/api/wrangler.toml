@@ -1,0 +1,19 @@
+name = "invieasy-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-27"
+
+[vars]
+APP_ENV = "development"
+
+# Bindings to add per environment:
+# [[r2_buckets]]
+# binding = "MEDIA_BUCKET"
+# bucket_name = "invieasy-dev-media"
+#
+# [[hyperdrive]]
+# binding = "DB"
+# id = "<hyperdrive-id>"
+#
+# [[queues.producers]]
+# binding = "NOTIFICATION_QUEUE"
+# queue = "invieasy-dev-notifications"
