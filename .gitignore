@@ -11,6 +11,7 @@ coverage/
 .DS_Store
 *.log
 *.local
+*.tsbuildinfo
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
