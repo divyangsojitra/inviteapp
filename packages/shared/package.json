@@ -1,0 +1,14 @@
+{
+  "name": "@invieasy/shared",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "echo \"shared lint pending\"",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"shared tests pending\""
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
