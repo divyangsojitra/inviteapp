@@ -1,6 +1,7 @@
 import { Hono } from "hono";
+import type { AppContext } from "../../app-env";
 
-export const healthRoutes = new Hono();
+export const healthRoutes = new Hono<AppContext>();
 
 healthRoutes.get("/", (c) =>
   c.json({
