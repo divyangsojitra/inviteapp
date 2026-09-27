@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.wrangler/
+.turbo/
+dist/
+build/
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+*.local
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
