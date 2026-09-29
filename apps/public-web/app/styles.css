@@ -73,7 +73,15 @@ h1 {
   margin-top: var(--space-32);
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  margin-top: var(--space-32);
+}
+
 .button {
+  border: 0;
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -82,6 +90,7 @@ h1 {
   padding: 0 var(--space-16);
   text-decoration: none;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .button.primary {
@@ -94,9 +103,191 @@ h1 {
   color: var(--color-primary);
 }
 
+.button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.wide-button {
+  width: 100%;
+}
+
+.host-shell {
+  min-height: 100svh;
+  padding: var(--space-24);
+}
+
+.host-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+  max-width: 1120px;
+  margin: 0 auto var(--space-24);
+  padding-top: var(--space-24);
+}
+
+.host-header h1,
+.host-panel h1,
+.host-panel h2 {
+  margin: 0;
+  color: var(--color-primary);
+}
+
+.host-header h1 {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.06;
+}
+
+.host-panel h1 {
+  font-size: clamp(2rem, 7vw, 4rem);
+  line-height: 1.06;
+}
+
+.host-panel h2 {
+  font-size: 1.5rem;
+}
+
+.host-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: var(--space-24);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.host-panel {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-radius: var(--radius-8);
+  padding: var(--space-24);
+  background: color-mix(in srgb, white 64%, var(--color-bg));
+  box-shadow: 0 16px 48px rgb(9 87 100 / 10%);
+}
+
+.auth-panel {
+  max-width: 680px;
+  margin: 8vh auto 0;
+}
+
+.event-form {
+  display: grid;
+  gap: var(--space-16);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-8);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: var(--radius-8);
+  min-height: 48px;
+  padding: 0 var(--space-12);
+  background: white;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 500;
+}
+
+.field textarea {
+  min-height: 96px;
+  padding-top: var(--space-12);
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 3px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  border-color: var(--color-accent);
+}
+
+.form-error,
+.form-success,
+.muted {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.form-error {
+  color: var(--color-danger, #b00020);
+}
+
+.form-success {
+  color: var(--color-success, #2f7a4a);
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.empty-state {
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-24);
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 24%, transparent);
+  border-radius: var(--radius-8);
+  color: var(--color-muted);
+}
+
+.empty-state strong {
+  color: var(--color-text);
+}
+
+.event-list {
+  display: grid;
+  gap: var(--space-12);
+  margin-top: var(--space-16);
+}
+
+.event-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-radius: var(--radius-8);
+  padding: var(--space-16);
+  background: white;
+}
+
+.event-card div {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.event-card span {
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.status-chip {
+  border-radius: 999px;
+  padding: var(--space-4) var(--space-8);
+  background: var(--color-surface);
+  color: var(--color-primary) !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
 @media (max-width: 640px) {
   .page-shell,
-  .invite-page {
+  .invite-page,
+  .host-shell {
     padding: var(--space-16);
   }
 
@@ -121,5 +312,26 @@ h1 {
   .button {
     padding: 0 var(--space-8);
     font-size: 0.875rem;
+  }
+
+  .hero-actions .button,
+  .host-header .button,
+  .event-form .button {
+    padding: 0 var(--space-16);
+  }
+}
+
+@media (max-width: 860px) {
+  .host-header {
+    display: grid;
+  }
+
+  .host-grid,
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .host-panel {
+    padding: var(--space-16);
   }
 }

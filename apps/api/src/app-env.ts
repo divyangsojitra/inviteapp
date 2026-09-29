@@ -3,6 +3,7 @@ export type AppBindings = {
   DATABASE_URL?: string;
   DB?: Hyperdrive;
   FIREBASE_PROJECT_ID?: string;
+  CORS_ORIGIN?: string;
 };
 
 export type CurrentUser = {

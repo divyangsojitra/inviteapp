@@ -8,6 +8,11 @@ export default function HomePage() {
           A WhatsApp-first invitation platform for weddings, birthdays,
           cultural events, memorials, and every meaningful gathering.
         </p>
+        <div className="hero-actions">
+          <a className="button primary" href="/host">
+            Open Host Dashboard
+          </a>
+        </div>
       </section>
     </main>
   );
