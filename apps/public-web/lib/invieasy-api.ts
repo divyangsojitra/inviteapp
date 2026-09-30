@@ -41,6 +41,11 @@ export type CreateEventPayload = {
   mapUrl?: string;
 };
 
+export type UpdateEventPayload = Partial<CreateEventPayload> & {
+  status?: EventDto["status"];
+  isPublic?: boolean;
+};
+
 type ApiResponse<T> = {
   data?: T;
   error?: {
@@ -76,6 +81,21 @@ async function request<T>(
   return payload.data;
 }
 
+async function publicRequest<T>(path: string): Promise<T> {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    next: {
+      revalidate: 30
+    }
+  });
+  const payload = (await response.json()) as ApiResponse<T>;
+
+  if (!response.ok || !payload.data) {
+    throw new Error(payload.error?.message ?? "Something went wrong.");
+  }
+
+  return payload.data;
+}
+
 export async function listEvents(token: string) {
   return request<EventDto[]>("/v1/events", token);
 }
@@ -85,4 +105,19 @@ export async function createEvent(token: string, payload: CreateEventPayload) {
     method: "POST",
     body: JSON.stringify(payload)
   });
+}
+
+export async function updateEvent(
+  token: string,
+  eventId: string,
+  payload: UpdateEventPayload
+) {
+  return request<EventDto>(`/v1/events/${eventId}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function getPublicEvent(slug: string) {
+  return publicRequest<EventDto>(`/v1/public/events/${slug}`);
 }
