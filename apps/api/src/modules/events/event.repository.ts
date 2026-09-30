@@ -85,6 +85,26 @@ export class EventRepository {
     return event ?? null;
   }
 
+  async findPublishedBySlug(slug: string) {
+    if (!this.db) {
+      return null;
+    }
+
+    const [event] = await this.db
+      .select()
+      .from(events)
+      .where(
+        and(
+          eq(events.slug, slug),
+          eq(events.status, "published"),
+          eq(events.isPublic, true)
+        )
+      )
+      .limit(1);
+
+    return event ?? null;
+  }
+
   async update(ownerUserId: string, id: string, command: UpdateEventCommand) {
     if (!this.db) {
       return null;
