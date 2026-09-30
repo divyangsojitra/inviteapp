@@ -3,19 +3,21 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   GoogleAuthProvider,
-  User,
   onAuthStateChanged,
   signInWithPopup,
-  signOut
+  signOut,
+  type Auth,
+  type User
 } from "firebase/auth";
-import { firebaseAuth } from "../../lib/firebase";
+import { getFirebaseAuth, isFirebaseConfigured } from "../../lib/firebase";
 import {
   CreateEventPayload,
   EventCategory,
   EventDto,
   SupportedLanguage,
   createEvent,
-  listEvents
+  listEvents,
+  updateEvent
 } from "../../lib/invieasy-api";
 
 const eventCategories: { label: string; value: EventCategory }[] = [
@@ -77,7 +79,16 @@ function formatEventDate(value: string) {
   }).format(new Date(value));
 }
 
+function getPublicEventUrl(slug: string) {
+  if (typeof window === "undefined") {
+    return `/e/${slug}`;
+  }
+
+  return `${window.location.origin}/e/${slug}`;
+}
+
 export function HostDashboard() {
+  const [auth, setAuth] = useState<Auth | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [events, setEvents] = useState<EventDto[]>([]);
@@ -96,6 +107,17 @@ export function HostDashboard() {
   }, [user?.displayName]);
 
   useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      setError(
+        "Firebase is not configured yet. Add the public Firebase environment variables to enable sign in."
+      );
+      setIsAuthReady(true);
+      return;
+    }
+
+    const firebaseAuth = getFirebaseAuth();
+    setAuth(firebaseAuth);
+
     return onAuthStateChanged(firebaseAuth, (nextUser) => {
       setUser(nextUser);
       setIsAuthReady(true);
@@ -141,12 +163,21 @@ export function HostDashboard() {
   }, [user]);
 
   async function handleGoogleSignIn() {
+    if (!auth) {
+      setError("Firebase sign in is not configured yet.");
+      return;
+    }
+
     setError(null);
-    await signInWithPopup(firebaseAuth, new GoogleAuthProvider());
+    await signInWithPopup(auth, new GoogleAuthProvider());
   }
 
   async function handleSignOut() {
-    await signOut(firebaseAuth);
+    if (!auth) {
+      return;
+    }
+
+    await signOut(auth);
     setMessage(null);
     setError(null);
   }
@@ -175,6 +206,41 @@ export function HostDashboard() {
     }
   }
 
+  async function handlePublish(event: EventDto) {
+    if (!user) {
+      return;
+    }
+
+    setError(null);
+    setMessage(null);
+
+    try {
+      const token = await user.getIdToken();
+      const published = await updateEvent(token, event.id, {
+        status: "published",
+        isPublic: true
+      });
+
+      setEvents((current) =>
+        current.map((item) => (item.id === published.id ? published : item))
+      );
+      setMessage("Invitation published. You can now share the public link.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to publish event.");
+    }
+  }
+
+  async function handleCopyLink(event: EventDto) {
+    const publicUrl = getPublicEventUrl(event.slug);
+
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setMessage("Invitation link copied.");
+    } catch {
+      setError("Unable to copy link. Please open the invite and copy the URL.");
+    }
+  }
+
   if (!isAuthReady) {
     return (
       <main className="host-shell">
@@ -196,6 +262,7 @@ export function HostDashboard() {
             Sign in to create your first event, save it securely, and prepare it
             for WhatsApp sharing, RSVP, and reminders.
           </p>
+          {error ? <p className="form-error">{error}</p> : null}
           <button className="button primary wide-button" onClick={handleGoogleSignIn}>
             Continue with Google
           </button>
@@ -357,8 +424,28 @@ export function HostDashboard() {
                 <div>
                   <strong>{event.title}</strong>
                   <span>{formatEventDate(event.startsAt)}</span>
+                  {event.isPublic ? (
+                    <a href={`/e/${event.slug}`}>Open public invite</a>
+                  ) : null}
                 </div>
-                <span className="status-chip">{event.status}</span>
+                <div className="event-actions">
+                  <span className="status-chip">{event.status}</span>
+                  {event.status === "published" && event.isPublic ? (
+                    <button
+                      className="button secondary compact-button"
+                      onClick={() => handleCopyLink(event)}
+                    >
+                      Copy Link
+                    </button>
+                  ) : (
+                    <button
+                      className="button primary compact-button"
+                      onClick={() => handlePublish(event)}
+                    >
+                      Publish
+                    </button>
+                  )}
+                </div>
               </article>
             ))}
           </div>
