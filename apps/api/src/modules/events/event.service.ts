@@ -23,6 +23,12 @@ export class EventService {
     return event ? toEventDto(event) : null;
   }
 
+  async getPublicEvent(slug: string) {
+    const event = await this.eventRepository.findPublishedBySlug(slug);
+
+    return event ? toEventDto(event) : null;
+  }
+
   async updateEvent(ownerUserId: string, id: string, command: UpdateEventCommand) {
     const event = await this.eventRepository.update(ownerUserId, id, command);
 
