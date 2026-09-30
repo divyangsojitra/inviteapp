@@ -1,7 +1,5 @@
-"use client";
-
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, type Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,8 +10,20 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-export const firebaseApp = getApps().length
-  ? getApp()
-  : initializeApp(firebaseConfig);
+export function isFirebaseConfigured() {
+  return Object.values(firebaseConfig).every(Boolean);
+}
 
-export const firebaseAuth = getAuth(firebaseApp);
+export function getFirebaseAuth(): Auth {
+  if (!isFirebaseConfigured()) {
+    throw new Error(
+      "Firebase is not configured. Add the NEXT_PUBLIC_FIREBASE_* environment variables."
+    );
+  }
+
+  const firebaseApp = getApps().length
+    ? getApp()
+    : initializeApp(firebaseConfig);
+
+  return getAuth(firebaseApp);
+}
