@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import type { AppContext } from "./app-env";
 import { healthRoutes } from "./modules/health/health.routes";
 import { eventRoutes } from "./modules/events/event.routes";
+import { publicRoutes } from "./modules/public/public.routes";
 
 const app = new Hono<AppContext>();
 
@@ -25,6 +26,7 @@ app.use(
 );
 
 app.route("/v1/health", healthRoutes);
+app.route("/v1/public", publicRoutes);
 app.route("/v1/events", eventRoutes);
 
 app.notFound((c) =>
