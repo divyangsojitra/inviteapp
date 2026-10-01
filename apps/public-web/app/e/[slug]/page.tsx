@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicEvent, type EventDto } from "../../../lib/invieasy-api";
+import { PublicEventActions } from "./public-event-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -118,24 +119,10 @@ export default async function PublicEventPage({ params }: EventPageProps) {
         </div>
       </section>
 
-      <section className="invite-section" id="rsvp">
-        <p className="eyebrow">RSVP</p>
-        <h2>Will you attend?</h2>
-        <div className="segmented-actions">
-          <button className="button secondary">Yes</button>
-          <button className="button secondary">Maybe</button>
-          <button className="button secondary">No</button>
-        </div>
-      </section>
-
-      <section className="invite-section" id="reminder">
-        <p className="eyebrow">Reminder</p>
-        <h2>Add this event to your calendar</h2>
-        <p className="muted">
-          Calendar reminders are coming next. For now, keep this invitation link
-          handy after RSVP.
-        </p>
-      </section>
+      <PublicEventActions
+        primaryLanguage={event.primaryLanguage}
+        slug={event.slug}
+      />
     </main>
   );
 }
