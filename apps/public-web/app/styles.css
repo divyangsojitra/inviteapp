@@ -360,6 +360,10 @@ h1 {
   gap: var(--space-4);
 }
 
+.event-card-main {
+  width: 100%;
+}
+
 .event-card a {
   color: var(--color-primary);
   font-weight: 700;
@@ -374,6 +378,40 @@ h1 {
 
 .event-actions {
   justify-items: end;
+}
+
+.rsvp-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+.rsvp-summary span {
+  border-radius: var(--radius-8);
+  padding: var(--space-8);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.rsvp-list {
+  gap: var(--space-8) !important;
+  margin-top: var(--space-12);
+}
+
+.rsvp-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12) !important;
+  border-top: 1px solid color-mix(in srgb, var(--color-primary) 10%, transparent);
+  padding-top: var(--space-8);
+}
+
+.rsvp-row strong {
+  color: var(--color-primary);
 }
 
 .compact-button {
@@ -452,5 +490,9 @@ h1 {
 
   .event-actions {
     justify-items: start;
+  }
+
+  .rsvp-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
