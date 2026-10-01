@@ -105,6 +105,44 @@ eventRoutes.get("/:id", async (c) => {
   return c.json({ data: event });
 });
 
+eventRoutes.get("/:id/rsvps", async (c) => {
+  const parsed = eventIdParamSchema.safeParse({ id: c.req.param("id") });
+
+  if (!parsed.success) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Please provide a valid event ID.",
+          issues: parsed.error.flatten()
+        }
+      },
+      400
+    );
+  }
+
+  const eventService = createEventService(c);
+  const currentUser = c.get("currentUser");
+  const rsvps = await eventService.listEventRsvps(
+    currentUser.id,
+    parsed.data.id
+  );
+
+  if (!rsvps) {
+    return c.json(
+      {
+        error: {
+          code: "EVENT_NOT_FOUND",
+          message: "Event was not found."
+        }
+      },
+      404
+    );
+  }
+
+  return c.json({ data: rsvps });
+});
+
 eventRoutes.patch("/:id", async (c) => {
   const params = eventIdParamSchema.safeParse({ id: c.req.param("id") });
 
