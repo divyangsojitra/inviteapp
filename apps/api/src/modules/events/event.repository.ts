@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import type { Database } from "../../db/client";
-import { events } from "../../db/schema";
+import { events, guests, rsvps } from "../../db/schema";
 import { createEventSlug } from "./event.slug";
 import type { CreateEventCommand, UpdateEventCommand } from "./event.types";
 
@@ -121,5 +121,33 @@ export class EventRepository {
       .returning();
 
     return updated ?? null;
+  }
+
+  async listRsvps(ownerUserId: string, eventId: string) {
+    if (!this.db) {
+      return [];
+    }
+
+    const event = await this.findById(ownerUserId, eventId);
+
+    if (!event) {
+      return null;
+    }
+
+    return this.db
+      .select({
+        id: rsvps.id,
+        guestId: rsvps.guestId,
+        guestName: guests.name,
+        guestPhone: guests.phone,
+        guestEmail: guests.email,
+        status: rsvps.status,
+        partySize: rsvps.partySize,
+        createdAt: rsvps.createdAt
+      })
+      .from(rsvps)
+      .leftJoin(guests, eq(rsvps.guestId, guests.id))
+      .where(eq(rsvps.eventId, eventId))
+      .orderBy(desc(rsvps.createdAt));
   }
 }
