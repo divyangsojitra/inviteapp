@@ -4,7 +4,11 @@ import { createDatabase } from "../../db/client";
 import { EventRepository } from "../events/event.repository";
 import { EventService } from "../events/event.service";
 import { PublicRepository } from "./public.repository";
-import { publicEventSlugParamSchema, publicRsvpSchema } from "./public.schema";
+import {
+  publicEventSlugParamSchema,
+  publicReminderSchema,
+  publicRsvpSchema
+} from "./public.schema";
 import { PublicService } from "./public.service";
 
 export const publicRoutes = new Hono<AppContext>();
@@ -102,6 +106,73 @@ publicRoutes.post("/events/:slug/rsvp", async (c) => {
   }
 
   return c.json({ data: rsvp }, 201);
+});
+
+publicRoutes.post("/events/:slug/reminders", async (c) => {
+  const params = publicEventSlugParamSchema.safeParse({
+    slug: c.req.param("slug")
+  });
+
+  if (!params.success) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Please provide a valid event link.",
+          issues: params.error.flatten()
+        }
+      },
+      400
+    );
+  }
+
+  const body = await c.req.json();
+  const parsed = publicReminderSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Please check the reminder details.",
+          issues: parsed.error.flatten()
+        }
+      },
+      400
+    );
+  }
+
+  const publicService = createPublicService(c);
+  const result = await publicService.createReminder(
+    params.data.slug,
+    parsed.data
+  );
+
+  if (!result.ok && result.reason === "not_found") {
+    return c.json(
+      {
+        error: {
+          code: "EVENT_NOT_FOUND",
+          message: "Invitation was not found or is not published yet."
+        }
+      },
+      404
+    );
+  }
+
+  if (!result.ok) {
+    return c.json(
+      {
+        error: {
+          code: "INVALID_REMINDER_TIME",
+          message: "Choose a reminder time before the event and after now."
+        }
+      },
+      400
+    );
+  }
+
+  return c.json({ data: result.data }, 201);
 });
 
 publicRoutes.get("/events/:slug/calendar.ics", async (c) => {
