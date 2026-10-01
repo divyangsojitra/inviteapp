@@ -4,6 +4,10 @@ export type AppBindings = {
   DB?: Hyperdrive;
   FIREBASE_PROJECT_ID?: string;
   CORS_ORIGIN?: string;
+  PUBLIC_WEB_BASE_URL?: string;
+  REMINDER_BATCH_SIZE?: string;
+  REMINDER_FROM_EMAIL?: string;
+  RESEND_API_KEY?: string;
 };
 
 export type CurrentUser = {
