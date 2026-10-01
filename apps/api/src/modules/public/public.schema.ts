@@ -13,4 +13,12 @@ export const publicRsvpSchema = z.object({
   preferredLanguage: z.enum(["en", "hi", "gu"]).optional()
 });
 
+export const publicReminderSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(160),
+  scheduledAt: z.string().datetime(),
+  preferredLanguage: z.enum(["en", "hi", "gu"]).optional()
+});
+
 export type PublicRsvpInput = z.infer<typeof publicRsvpSchema>;
+export type PublicReminderInput = z.infer<typeof publicReminderSchema>;
