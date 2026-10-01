@@ -20,5 +20,30 @@ export type EventDto = {
   updatedAt: string;
 };
 
+export type EventRsvpDto = {
+  id: string;
+  guestId: string | null;
+  guestName: string;
+  guestPhone: string | null;
+  guestEmail: string | null;
+  status: "pending" | "yes" | "no" | "maybe";
+  partySize: number;
+  createdAt: string;
+};
+
+export type EventRsvpSummaryDto = {
+  total: number;
+  yes: number;
+  no: number;
+  maybe: number;
+  pending: number;
+  partySize: number;
+};
+
+export type EventRsvpListDto = {
+  summary: EventRsvpSummaryDto;
+  guests: EventRsvpDto[];
+};
+
 export type CreateEventCommand = CreateEventInput;
 export type UpdateEventCommand = UpdateEventInput;
