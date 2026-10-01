@@ -6,6 +6,11 @@ compatibility_date = "2026-09-27"
 APP_ENV = "development"
 FIREBASE_PROJECT_ID = "invitation-c6d26"
 CORS_ORIGIN = "http://localhost:3000"
+PUBLIC_WEB_BASE_URL = "http://localhost:3000"
+REMINDER_BATCH_SIZE = "25"
+
+[triggers]
+crons = ["*/15 * * * *"]
 
 # Bindings to add per environment:
 # [[r2_buckets]]
@@ -19,3 +24,8 @@ CORS_ORIGIN = "http://localhost:3000"
 # [[queues.producers]]
 # binding = "NOTIFICATION_QUEUE"
 # queue = "invieasy-dev-notifications"
+#
+# Secrets to configure per environment:
+# - DATABASE_URL or Hyperdrive binding DB
+# - RESEND_API_KEY
+# - REMINDER_FROM_EMAIL
