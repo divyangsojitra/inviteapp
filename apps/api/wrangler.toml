@@ -27,5 +27,3 @@ crons = ["*/15 * * * *"]
 #
 # Secrets to configure per environment:
 # - DATABASE_URL or Hyperdrive binding DB
-# - RESEND_API_KEY
-# - REMINDER_FROM_EMAIL
