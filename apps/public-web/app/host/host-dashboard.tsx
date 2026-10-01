@@ -14,8 +14,10 @@ import {
   CreateEventPayload,
   EventCategory,
   EventDto,
+  EventRsvpListDto,
   SupportedLanguage,
   createEvent,
+  listEventRsvps,
   listEvents,
   updateEvent
 } from "../../lib/invieasy-api";
@@ -87,11 +89,18 @@ function getPublicEventUrl(slug: string) {
   return `${window.location.origin}/e/${slug}`;
 }
 
+function formatRsvpStatus(status: string) {
+  return status === "yes" ? "attending" : status;
+}
+
 export function HostDashboard() {
   const [auth, setAuth] = useState<Auth | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [events, setEvents] = useState<EventDto[]>([]);
+  const [rsvpsByEventId, setRsvpsByEventId] = useState<
+    Record<string, EventRsvpListDto>
+  >({});
   const [form, setForm] = useState<FormState>(initialFormState);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -127,6 +136,7 @@ export function HostDashboard() {
   useEffect(() => {
     if (!user) {
       setEvents([]);
+      setRsvpsByEventId({});
       return;
     }
 
@@ -140,9 +150,17 @@ export function HostDashboard() {
       try {
         const token = await authUser.getIdToken();
         const data = await listEvents(token);
+        const rsvpEntries = await Promise.all(
+          data.map(async (event) => {
+            const rsvps = await listEventRsvps(token, event.id);
+
+            return [event.id, rsvps] as const;
+          })
+        );
 
         if (isMounted) {
           setEvents(data);
+          setRsvpsByEventId(Object.fromEntries(rsvpEntries));
         }
       } catch (err) {
         if (isMounted) {
@@ -197,6 +215,20 @@ export function HostDashboard() {
       const token = await user.getIdToken();
       const created = await createEvent(token, toPayload(form));
       setEvents((current) => [created, ...current]);
+      setRsvpsByEventId((current) => ({
+        ...current,
+        [created.id]: {
+          summary: {
+            total: 0,
+            yes: 0,
+            no: 0,
+            maybe: 0,
+            pending: 0,
+            partySize: 0
+          },
+          guests: []
+        }
+      }));
       setForm(initialFormState);
       setMessage("Event saved as a draft.");
     } catch (err) {
@@ -421,12 +453,38 @@ export function HostDashboard() {
           <div className="event-list">
             {events.map((event) => (
               <article className="event-card" key={event.id}>
-                <div>
-                  <strong>{event.title}</strong>
-                  <span>{formatEventDate(event.startsAt)}</span>
-                  {event.isPublic ? (
-                    <a href={`/e/${event.slug}`}>Open public invite</a>
+                <div className="event-card-main">
+                  <div>
+                    <strong>{event.title}</strong>
+                    <span>{formatEventDate(event.startsAt)}</span>
+                    {event.isPublic ? (
+                      <a href={`/e/${event.slug}`}>Open public invite</a>
+                    ) : null}
+                  </div>
+                  {rsvpsByEventId[event.id] ? (
+                    <div className="rsvp-summary" aria-label="RSVP summary">
+                      <span>Yes {rsvpsByEventId[event.id].summary.yes}</span>
+                      <span>Maybe {rsvpsByEventId[event.id].summary.maybe}</span>
+                      <span>No {rsvpsByEventId[event.id].summary.no}</span>
+                      <span>
+                        Guests {rsvpsByEventId[event.id].summary.partySize}
+                      </span>
+                    </div>
                   ) : null}
+                  {rsvpsByEventId[event.id]?.guests.length ? (
+                    <div className="rsvp-list">
+                      {rsvpsByEventId[event.id].guests.slice(0, 3).map((rsvp) => (
+                        <div className="rsvp-row" key={rsvp.id}>
+                          <span>
+                            {rsvp.guestName} · {formatRsvpStatus(rsvp.status)}
+                          </span>
+                          <strong>{rsvp.partySize}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">No RSVPs yet.</p>
+                  )}
                 </div>
                 <div className="event-actions">
                   <span className="status-chip">{event.status}</span>
