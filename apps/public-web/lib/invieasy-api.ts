@@ -30,6 +30,16 @@ export type EventDto = {
   updatedAt: string;
 };
 
+export type PublicRsvpDto = {
+  id: string;
+  eventId: string;
+  guestId: string;
+  status: "yes" | "no" | "maybe";
+  partySize: number;
+  guestName: string;
+  createdAt: string;
+};
+
 export type CreateEventPayload = {
   title: string;
   category: EventCategory;
@@ -44,6 +54,15 @@ export type CreateEventPayload = {
 export type UpdateEventPayload = Partial<CreateEventPayload> & {
   status?: EventDto["status"];
   isPublic?: boolean;
+};
+
+export type PublicRsvpPayload = {
+  name: string;
+  phone?: string;
+  email?: string;
+  status: PublicRsvpDto["status"];
+  partySize: number;
+  preferredLanguage?: SupportedLanguage;
 };
 
 type ApiResponse<T> = {
@@ -120,4 +139,28 @@ export async function updateEvent(
 
 export async function getPublicEvent(slug: string) {
   return publicRequest<EventDto>(`/v1/public/events/${slug}`);
+}
+
+export async function createPublicRsvp(
+  slug: string,
+  payload: PublicRsvpPayload
+) {
+  const response = await fetch(`${apiBaseUrl}/v1/public/events/${slug}/rsvp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+  const body = (await response.json()) as ApiResponse<PublicRsvpDto>;
+
+  if (!response.ok || !body.data) {
+    throw new Error(body.error?.message ?? "Unable to save RSVP.");
+  }
+
+  return body.data;
+}
+
+export function getPublicCalendarUrl(slug: string) {
+  return `${apiBaseUrl}/v1/public/events/${slug}/calendar.ics`;
 }
