@@ -40,6 +40,17 @@ export type PublicRsvpDto = {
   createdAt: string;
 };
 
+export type PublicReminderDto = {
+  id: string;
+  eventId: string;
+  guestId: string;
+  channel: "email";
+  status: "scheduled" | "sent" | "failed" | "cancelled";
+  scheduledAt: string;
+  guestName: string;
+  createdAt: string;
+};
+
 export type EventRsvpDto = {
   id: string;
   guestId: string | null;
@@ -85,6 +96,13 @@ export type PublicRsvpPayload = {
   email?: string;
   status: PublicRsvpDto["status"];
   partySize: number;
+  preferredLanguage?: SupportedLanguage;
+};
+
+export type PublicReminderPayload = {
+  name: string;
+  email: string;
+  scheduledAt: string;
   preferredLanguage?: SupportedLanguage;
 };
 
@@ -183,6 +201,29 @@ export async function createPublicRsvp(
 
   if (!response.ok || !body.data) {
     throw new Error(body.error?.message ?? "Unable to save RSVP.");
+  }
+
+  return body.data;
+}
+
+export async function createPublicReminder(
+  slug: string,
+  payload: PublicReminderPayload
+) {
+  const response = await fetch(
+    `${apiBaseUrl}/v1/public/events/${slug}/reminders`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+  const body = (await response.json()) as ApiResponse<PublicReminderDto>;
+
+  if (!response.ok || !body.data) {
+    throw new Error(body.error?.message ?? "Unable to schedule reminder.");
   }
 
   return body.data;
