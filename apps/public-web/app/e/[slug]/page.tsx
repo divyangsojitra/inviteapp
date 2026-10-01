@@ -122,6 +122,7 @@ export default async function PublicEventPage({ params }: EventPageProps) {
       <PublicEventActions
         primaryLanguage={event.primaryLanguage}
         slug={event.slug}
+        startsAt={event.startsAt}
       />
     </main>
   );
