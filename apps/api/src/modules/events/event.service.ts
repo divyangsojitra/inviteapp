@@ -1,6 +1,10 @@
 import type { EventRepository } from "./event.repository";
 import { toEventDto } from "./event.mapper";
-import type { CreateEventCommand, UpdateEventCommand } from "./event.types";
+import type {
+  CreateEventCommand,
+  EventRsvpListDto,
+  UpdateEventCommand
+} from "./event.types";
 
 export class EventService {
   constructor(private readonly eventRepository: EventRepository) {}
@@ -33,5 +37,44 @@ export class EventService {
     const event = await this.eventRepository.update(ownerUserId, id, command);
 
     return event ? toEventDto(event) : null;
+  }
+
+  async listEventRsvps(ownerUserId: string, eventId: string) {
+    const rsvps = await this.eventRepository.listRsvps(ownerUserId, eventId);
+
+    if (!rsvps) {
+      return null;
+    }
+
+    return rsvps.reduce<EventRsvpListDto>(
+      (result, rsvp) => {
+        result.summary.total += 1;
+        result.summary[rsvp.status] += 1;
+        result.summary.partySize += rsvp.partySize;
+        result.guests.push({
+          id: rsvp.id,
+          guestId: rsvp.guestId,
+          guestName: rsvp.guestName ?? "Guest",
+          guestPhone: rsvp.guestPhone,
+          guestEmail: rsvp.guestEmail,
+          status: rsvp.status,
+          partySize: rsvp.partySize,
+          createdAt: rsvp.createdAt.toISOString()
+        });
+
+        return result;
+      },
+      {
+        summary: {
+          total: 0,
+          yes: 0,
+          no: 0,
+          maybe: 0,
+          pending: 0,
+          partySize: 0
+        },
+        guests: []
+      }
+    );
   }
 }
