@@ -1,6 +1,11 @@
 import type { EventService } from "../events/event.service";
 import type { PublicRepository } from "./public.repository";
-import type { PublicRsvpCommand, PublicRsvpDto } from "./public.types";
+import type {
+  PublicReminderCommand,
+  PublicReminderDto,
+  PublicRsvpCommand,
+  PublicRsvpDto
+} from "./public.types";
 import { createEventCalendar } from "./calendar";
 
 export class PublicService {
@@ -11,6 +16,50 @@ export class PublicService {
 
   async getPublishedEvent(slug: string) {
     return this.eventService.getPublicEvent(slug);
+  }
+
+  async createReminder(slug: string, command: PublicReminderCommand) {
+    const event = await this.getPublishedEvent(slug);
+
+    if (!event) {
+      return {
+        ok: false as const,
+        reason: "not_found" as const
+      };
+    }
+
+    const scheduledAt = new Date(command.scheduledAt);
+    const eventStartsAt = new Date(event.startsAt);
+
+    if (
+      Number.isNaN(scheduledAt.getTime()) ||
+      scheduledAt <= new Date() ||
+      scheduledAt > eventStartsAt
+    ) {
+      return {
+        ok: false as const,
+        reason: "invalid_schedule" as const
+      };
+    }
+
+    const { guest, reminder } = await this.publicRepository.createReminder(
+      event.id,
+      command
+    );
+
+    return {
+      ok: true as const,
+      data: {
+        id: reminder.id,
+        eventId: reminder.eventId,
+        guestId: guest.id,
+        channel: "email",
+        status: reminder.status,
+        scheduledAt: reminder.scheduledAt.toISOString(),
+        guestName: guest.name,
+        createdAt: reminder.createdAt.toISOString()
+      } satisfies PublicReminderDto
+    };
   }
 
   async createRsvp(slug: string, command: PublicRsvpCommand) {
