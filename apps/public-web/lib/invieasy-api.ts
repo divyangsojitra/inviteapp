@@ -40,6 +40,29 @@ export type PublicRsvpDto = {
   createdAt: string;
 };
 
+export type EventRsvpDto = {
+  id: string;
+  guestId: string | null;
+  guestName: string;
+  guestPhone: string | null;
+  guestEmail: string | null;
+  status: "pending" | "yes" | "no" | "maybe";
+  partySize: number;
+  createdAt: string;
+};
+
+export type EventRsvpListDto = {
+  summary: {
+    total: number;
+    yes: number;
+    no: number;
+    maybe: number;
+    pending: number;
+    partySize: number;
+  };
+  guests: EventRsvpDto[];
+};
+
 export type CreateEventPayload = {
   title: string;
   category: EventCategory;
@@ -135,6 +158,10 @@ export async function updateEvent(
     method: "PATCH",
     body: JSON.stringify(payload)
   });
+}
+
+export async function listEventRsvps(token: string, eventId: string) {
+  return request<EventRsvpListDto>(`/v1/events/${eventId}/rsvps`, token);
 }
 
 export async function getPublicEvent(slug: string) {
