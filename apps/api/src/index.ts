@@ -4,6 +4,7 @@ import type { AppContext } from "./app-env";
 import { healthRoutes } from "./modules/health/health.routes";
 import { eventRoutes } from "./modules/events/event.routes";
 import { publicRoutes } from "./modules/public/public.routes";
+import { processDueReminders } from "./modules/reminders/reminder.processor";
 
 const app = new Hono<AppContext>();
 
@@ -55,4 +56,17 @@ app.onError((error, c) => {
   );
 });
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(_controller, env, ctx) {
+    ctx.waitUntil(
+      processDueReminders(env)
+        .then((summary) => {
+          console.log("Reminder delivery summary", summary);
+        })
+        .catch((error) => {
+          console.error("Reminder delivery failed", error);
+        })
+    );
+  }
+} satisfies ExportedHandler<AppContext["Bindings"]>;
