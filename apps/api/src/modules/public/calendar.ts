@@ -13,17 +13,50 @@ function escapeIcsText(value: string) {
 }
 
 export function createEventCalendar(event: EventDto) {
-  const startsAt = new Date(event.startsAt);
-  const endsAt = event.endsAt
-    ? new Date(event.endsAt)
-    : new Date(startsAt.getTime() + 60 * 60 * 1000);
-  const location = [event.venueName, event.address].filter(Boolean).join(", ");
-  const description = [
-    `Invitation: ${event.title}`,
-    event.mapUrl ? `Directions: ${event.mapUrl}` : null
-  ]
-    .filter(Boolean)
-    .join("\\n");
+  const functions = event.functions.length
+    ? event.functions
+    : [
+        {
+          id: event.id,
+          title: event.title,
+          description: null,
+          startsAt: event.startsAt,
+          endsAt: event.endsAt,
+          venueName: event.venueName,
+          address: event.address,
+          mapUrl: event.mapUrl,
+          sortOrder: 0
+        }
+      ];
+  const eventBlocks = functions.flatMap((item) => {
+    const startsAt = new Date(item.startsAt);
+    const endsAt = item.endsAt
+      ? new Date(item.endsAt)
+      : new Date(startsAt.getTime() + 60 * 60 * 1000);
+    const location = [item.venueName ?? event.venueName, item.address ?? event.address]
+      .filter(Boolean)
+      .join(", ");
+    const directionsUrl = item.mapUrl ?? event.mapUrl;
+    const description = [
+      `Invitation: ${event.title}`,
+      item.description,
+      directionsUrl ? `Directions: ${directionsUrl}` : null
+    ]
+      .filter(Boolean)
+      .join("\\n");
+
+    return [
+      "BEGIN:VEVENT",
+      `UID:${item.id}@invieasy`,
+      `DTSTAMP:${formatIcsDate(new Date().toISOString())}`,
+      `DTSTART:${formatIcsDate(startsAt.toISOString())}`,
+      `DTEND:${formatIcsDate(endsAt.toISOString())}`,
+      `SUMMARY:${escapeIcsText(`${event.title} - ${item.title}`)}`,
+      location ? `LOCATION:${escapeIcsText(location)}` : null,
+      `DESCRIPTION:${escapeIcsText(description)}`,
+      "END:VEVENT"
+    ].filter(Boolean);
+  });
 
   return [
     "BEGIN:VCALENDAR",
@@ -31,15 +64,7 @@ export function createEventCalendar(event: EventDto) {
     "PRODID:-//Invieasy//Invitation Calendar//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    "BEGIN:VEVENT",
-    `UID:${event.id}@invieasy`,
-    `DTSTAMP:${formatIcsDate(new Date().toISOString())}`,
-    `DTSTART:${formatIcsDate(startsAt.toISOString())}`,
-    `DTEND:${formatIcsDate(endsAt.toISOString())}`,
-    `SUMMARY:${escapeIcsText(event.title)}`,
-    location ? `LOCATION:${escapeIcsText(location)}` : null,
-    `DESCRIPTION:${escapeIcsText(description)}`,
-    "END:VEVENT",
+    ...eventBlocks,
     "END:VCALENDAR"
   ]
     .filter(Boolean)
