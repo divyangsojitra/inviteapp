@@ -12,7 +12,25 @@ function getBearerToken(authorizationHeader: string | undefined) {
   return authorizationHeader.slice("Bearer ".length).trim();
 }
 
+function canUseDevAuth(env: AppContext["Bindings"]) {
+  return env.APP_ENV !== "production" && env.DEV_AUTH_BYPASS === "true";
+}
+
 export const requireAuth: MiddlewareHandler<AppContext> = async (c, next) => {
+  const token = getBearerToken(c.req.header("authorization"));
+
+  if (canUseDevAuth(c.env) && token === "dev-local-token") {
+    const userRepository = new UserRepository(createDatabase(c.env));
+    const currentUser = await userRepository.upsertFirebaseUser({
+      firebaseUid: "dev-local-host",
+      email: "dev@invieasy.local",
+      displayName: "Dev Host"
+    });
+
+    c.set("currentUser", currentUser);
+    return next();
+  }
+
   const projectId = c.env.FIREBASE_PROJECT_ID;
 
   if (!projectId) {
@@ -26,8 +44,6 @@ export const requireAuth: MiddlewareHandler<AppContext> = async (c, next) => {
       500
     );
   }
-
-  const token = getBearerToken(c.req.header("authorization"));
 
   if (!token) {
     return c.json(
