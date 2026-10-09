@@ -16,8 +16,21 @@ export type EventDto = {
   mapUrl: string | null;
   slug: string;
   isPublic: boolean;
+  functions: EventFunctionDto[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type EventFunctionDto = {
+  id: string;
+  title: string;
+  description: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  venueName: string | null;
+  address: string | null;
+  mapUrl: string | null;
+  sortOrder: number;
 };
 
 export type EventRsvpDto = {
