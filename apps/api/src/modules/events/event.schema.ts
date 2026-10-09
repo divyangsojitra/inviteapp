@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const eventFunctionSchema = z.object({
+  title: z.string().min(2).max(120),
+  description: z.string().max(500).optional(),
+  startsAt: z.string().datetime(),
+  endsAt: z.string().datetime().optional(),
+  venueName: z.string().max(160).optional(),
+  address: z.string().max(500).optional(),
+  mapUrl: z.string().url().optional()
+});
+
 export const createEventSchema = z.object({
   title: z.string().min(2).max(120),
   category: z.enum([
@@ -19,7 +29,8 @@ export const createEventSchema = z.object({
   startsAt: z.string().datetime(),
   venueName: z.string().max(160).optional(),
   address: z.string().max(500).optional(),
-  mapUrl: z.string().url().optional()
+  mapUrl: z.string().url().optional(),
+  functions: z.array(eventFunctionSchema).min(1).max(12).optional()
 });
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
