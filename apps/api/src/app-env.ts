@@ -1,6 +1,7 @@
 export type AppBindings = {
   APP_ENV: string;
   DATABASE_URL?: string;
+  DEV_AUTH_BYPASS?: string;
   DB?: Hyperdrive;
   EMAIL?: SendEmailBinding;
   EMAIL_FROM_ADDRESS?: string;
