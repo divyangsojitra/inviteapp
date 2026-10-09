@@ -9,6 +9,10 @@ CORS_ORIGIN = "http://localhost:3000"
 PUBLIC_WEB_BASE_URL = "http://localhost:3000"
 REMINDER_BATCH_SIZE = "25"
 
+[[send_email]]
+name = "EMAIL"
+remote = true
+
 [triggers]
 crons = ["*/15 * * * *"]
 
@@ -27,3 +31,5 @@ crons = ["*/15 * * * *"]
 #
 # Secrets to configure per environment:
 # - DATABASE_URL or Hyperdrive binding DB
+# - EMAIL_FROM_ADDRESS after the sending domain is onboarded in Cloudflare Email Service
+# - EMAIL_REPLY_TO when replies should go somewhere different from the sender
