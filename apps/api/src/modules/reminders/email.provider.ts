@@ -1,7 +1,7 @@
 import type { AppBindings } from "../../app-env";
 import type { DueReminder } from "./reminder.types";
 
-type EmailMessage = {
+type AppEmailMessage = {
   to: string;
   subject: string;
   text: string;
@@ -10,7 +10,7 @@ type EmailMessage = {
 
 export type EmailProvider = {
   isConfigured(): boolean;
-  send(message: EmailMessage): Promise<void>;
+  send(message: AppEmailMessage): Promise<void>;
 };
 
 export class DisabledEmailProvider implements EmailProvider {
@@ -18,19 +18,53 @@ export class DisabledEmailProvider implements EmailProvider {
     return false;
   }
 
-  async send(_message: EmailMessage) {
+  async send(_message: AppEmailMessage) {
     throw new Error("Email provider is not configured.");
   }
 }
 
-export function createEmailProvider(_env: AppBindings): EmailProvider {
-  return new DisabledEmailProvider();
+export class CloudflareEmailProvider implements EmailProvider {
+  constructor(
+    private readonly emailBinding: NonNullable<AppBindings["EMAIL"]>,
+    private readonly fromAddress: string,
+    private readonly replyTo?: string
+  ) {}
+
+  isConfigured() {
+    return true;
+  }
+
+  async send(message: AppEmailMessage) {
+    await this.emailBinding.send({
+      to: message.to,
+      from: this.fromAddress,
+      replyTo: this.replyTo,
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
+      headers: {
+        "X-Invieasy-Message-Type": "event-reminder"
+      }
+    });
+  }
+}
+
+export function createEmailProvider(env: AppBindings): EmailProvider {
+  if (!env.EMAIL || !env.EMAIL_FROM_ADDRESS) {
+    return new DisabledEmailProvider();
+  }
+
+  return new CloudflareEmailProvider(
+    env.EMAIL,
+    env.EMAIL_FROM_ADDRESS,
+    env.EMAIL_REPLY_TO
+  );
 }
 
 export function buildReminderEmail(
   reminder: DueReminder,
   publicWebBaseUrl: string
-): EmailMessage | null {
+): AppEmailMessage | null {
   if (!reminder.guestEmail) {
     return null;
   }
