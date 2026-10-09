@@ -26,8 +26,21 @@ export type EventDto = {
   mapUrl: string | null;
   slug: string;
   isPublic: boolean;
+  functions: EventFunctionDto[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type EventFunctionDto = {
+  id: string;
+  title: string;
+  description: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  venueName: string | null;
+  address: string | null;
+  mapUrl: string | null;
+  sortOrder: number;
 };
 
 export type PublicRsvpDto = {
@@ -83,6 +96,15 @@ export type CreateEventPayload = {
   venueName?: string;
   address?: string;
   mapUrl?: string;
+  functions?: {
+    title: string;
+    description?: string;
+    startsAt: string;
+    endsAt?: string;
+    venueName?: string;
+    address?: string;
+    mapUrl?: string;
+  }[];
 };
 
 export type UpdateEventPayload = Partial<CreateEventPayload> & {
