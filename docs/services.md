@@ -9,6 +9,7 @@
 - Cloudflare R2 for object storage.
 - Cloudflare Queues for async jobs.
 - Cloudflare Workflows for reminders and multi-step flows.
+- Cloudflare Email Service for transactional reminders and confirmations.
 - Firebase Authentication for identity.
 
 ## Product Integrations
@@ -21,7 +22,33 @@
 - Meta WhatsApp Cloud API for WhatsApp notifications.
 - MSG91 for India SMS.
 - Twilio as international SMS fallback.
-- Email provider: SES, Postmark, or Resend.
+- Cloudflare Email Service for transactional email.
+
+## Email
+
+Use Cloudflare Email Service as the default transactional email provider.
+
+The API Worker binds Email Service with:
+
+```toml
+[[send_email]]
+name = "EMAIL"
+remote = true
+```
+
+Runtime configuration:
+
+- `EMAIL_FROM_ADDRESS`: verified sender address, for example `reminders@yourdomain.com`.
+- `EMAIL_REPLY_TO`: optional reply-to address.
+
+The application keeps email behind an internal provider abstraction. Reminder delivery stays disabled unless both the Cloudflare binding and `EMAIL_FROM_ADDRESS` are configured, which prevents accidental sends from local development or placeholder domains.
+
+Before production:
+
+- Onboard the sending domain in Cloudflare Email Service.
+- Confirm SPF, DKIM, DMARC, and bounce routing records.
+- Send deliverability tests to Gmail, Outlook, Yahoo, and common Indian mailbox providers.
+- Keep SMS and WhatsApp reminder channels behind the notification provider abstraction.
 
 ## AI Providers
 
