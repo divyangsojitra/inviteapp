@@ -51,6 +51,8 @@ type FormState = {
   mapUrl: string;
 };
 
+type HostUser = Pick<User, "displayName" | "getIdToken">;
+
 const initialFormState: FormState = {
   title: "",
   category: "wedding",
@@ -95,7 +97,7 @@ function formatRsvpStatus(status: string) {
 
 export function HostDashboard() {
   const [auth, setAuth] = useState<Auth | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<HostUser | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [events, setEvents] = useState<EventDto[]>([]);
   const [rsvpsByEventId, setRsvpsByEventId] = useState<
@@ -106,6 +108,7 @@ export function HostDashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const isDevAuthEnabled = process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "true";
 
   const firstName = useMemo(() => {
     if (!user?.displayName) {
@@ -187,15 +190,38 @@ export function HostDashboard() {
     }
 
     setError(null);
-    await signInWithPopup(auth, new GoogleAuthProvider());
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `${err.message} If you only want to test locally, use Continue as Dev Host.`
+          : "Unable to sign in with Google."
+      );
+    }
   }
 
-  async function handleSignOut() {
-    if (!auth) {
+  function handleDevSignIn() {
+    if (!isDevAuthEnabled) {
       return;
     }
 
-    await signOut(auth);
+    setError(null);
+    setMessage("Using local development sign in.");
+    setUser({
+      displayName: "Dev Host",
+      async getIdToken() {
+        return "dev-local-token";
+      }
+    });
+  }
+
+  async function handleSignOut() {
+    if (auth?.currentUser) {
+      await signOut(auth);
+    }
+
+    setUser(null);
     setMessage(null);
     setError(null);
   }
@@ -298,6 +324,14 @@ export function HostDashboard() {
           <button className="button primary wide-button" onClick={handleGoogleSignIn}>
             Continue with Google
           </button>
+          {isDevAuthEnabled ? (
+            <button
+              className="button secondary wide-button"
+              onClick={handleDevSignIn}
+            >
+              Continue as Dev Host
+            </button>
+          ) : null}
         </section>
       </main>
     );
